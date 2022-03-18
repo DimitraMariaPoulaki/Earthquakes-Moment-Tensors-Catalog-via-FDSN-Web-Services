@@ -1,0 +1,3 @@
+Flask==2.0.3
+https://github.com/obspy/obspy/archive/refs/heads/master.zip
+Flask-Cors==3.0.10

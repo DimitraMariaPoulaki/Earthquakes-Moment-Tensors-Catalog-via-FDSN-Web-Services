@@ -1,0 +1,185 @@
+<!doctype html>
+<html>
+<head>
+
+<link rel="shortcut icon" href="#">
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta content="utf-8" http-equiv="encoding">
+<meta charset="utf-8">
+<title> Earthquakes & Moment Tensors Catalog :via FDSN Web Services
+    </title>
+
+<script src="https://ajax.googleapis.com/ajax/libs/cesiumjs/1.78/Build/Cesium/Cesium.js"></script> 
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+<link rel="stylesheet" type="text/css" href="static/index.css">
+<!-- CSS -->
+<style>
+body{
+  background-image: url("static/new.png");
+  background-repeat: no-repeat;
+  background-size: 50%; 
+  background-position:left;
+  height: 100vh;
+    }
+    .dataTables_wrapper {
+  background-color: white;
+  opacity: 0.8;
+}
+.dataTables_wrapper {
+
+margin-right: 70px;
+margin-left: 70px;
+}
+.daterangepicker .ranges ul {
+
+color: #050505;
+text-shadow: 1px 1px 1px whitesmoke;
+}
+.dataTables_wrapper .dataTables_length {
+  float: right;
+}
+.dataTables_wrapper .dataTables_filter {
+  float: left;
+  text-align: right;
+}
+
+</style>
+<!-- CSS -->
+</head>
+<body >
+ 
+<h1 class="site-title" style= float:right;margin-right:20px;> Earthquakes & Moment Tensors Catalog  </h1>
+<br></br>
+<h3 class="site-description" style= float:right;margin-left:1000px;margin-right:20px;> via FDSN Web Services</h3>
+  
+<div class="arrow-1" id="reportrange" style="background: white;margin:0 auto; margin-top: 15px; cursor: pointer; padding: 10px 250px; border: 0.5px solid #000000; width: 40%; font-weight: bold;font-size:larger; opacity:0.8;">
+  <i class="fa fa-calendar"></i>&nbsp;
+  <span></span> <i class="fa fa-caret-down"></i>
+</div>
+
+<br>
+
+</br>
+<div >
+  <table id='example' class='display dataTable'  width='100%'>
+      <thead>
+      <tr>
+          <th>DateTime</th>
+          <th>Mw</th>
+          <th>Longitude</th>
+          <th>Latitude</th>
+          <th>Depth(Km)</th>
+          <th>Mo(Nm)</th>
+          <th>Event ID</th>
+              
+      </tr>
+      </thead>
+  </table>
+</div>
+</div>
+</div>
+    
+<script type="text/javascript">
+
+$(document).ready( function () {    
+
+   var starttime = moment().utc().subtract(1, 'month').startOf('month');    
+   var endtime = moment().utc();
+      
+   cb(starttime, endtime);
+
+
+$('#reportrange').daterangepicker({
+    starttime: starttime,
+    endtime: endtime,
+    ranges: {
+       'Last 7 Days': [moment().utc().subtract(6, 'days'), moment().utc()],
+       'Last 30 Days': [moment().utc().subtract(29, 'days'), moment().utc()],
+       'This Month': [moment().utc().startOf('month'), moment().utc().endOf('month')],
+       'Last Month': [moment().utc().subtract(2, 'month').startOf('month'), moment().utc().subtract(1, 'month').endOf('month')],
+       'This Year(2022)' : [moment().utc().startOf('year'),moment().utc()],
+       'Last Year(2021)' :[moment().utc().subtract(1, 'year').startOf('year'),moment().utc().subtract(1, 'year').endOf('year')],
+       'Year 2020' :[moment().utc().subtract(2, 'year').startOf('year'),moment().utc().subtract(2, 'year').endOf('year')],
+       'Year 2019' :[moment().utc().subtract(3, 'year').startOf('year'),moment().utc().subtract(3, 'year').endOf('year')]
+
+    }
+},cb);
+
+});
+
+            
+function cb(starttime, endtime) {
+    $('#reportrange span').html(starttime.format('YYYY-MM-DD') + ' to ' + endtime.format('YYYY-MM-DD'));
+    console.log(starttime.format('YYYY-MM-DD'), endtime.format('YYYY-MM-DD'))
+
+    $('#example').DataTable({
+                destroy: true,
+                fixedHeader: true,
+                
+            "ajax": {
+                "url": "http://localhost:5001/query", // This now also works
+                "dataType": 'json',
+                "data":{
+                    starttime : starttime.format('YYYY-MM-DD'),
+                    endtime : endtime.format('YYYY-MM-DD'),
+                    
+                },
+         
+                "dataSrc": "data",
+            }
+                ,
+                "columns": [
+                {"data": "mt",
+                "render": function(data, type, row, meta){
+            if(type === 'display'){
+                data = '<a href="' + "localhost:5002/query?year="+data.split('_')[0].substring(0,4) +"&eventid="+data.split('_')[1]+'">' + data.split('_')[0] + '</a>';
+            }
+            
+            return data;
+            
+                
+            }
+            },
+                {"data": "mwa",
+                "render": function(data, type, row, meta){
+            if(type === 'display'){
+                data = '<a href="' + "localhost:5003/query?year="+data.split('_')[0]+"&month="+data.split('_')[1]+"&eventid="+data.split('_')[2]+'">' + data.split('_')[3] + '</a>';
+            }
+            
+            return data;
+
+                
+            }
+            },
+                {"data": "longitude"},
+                {"data": "latitude"},
+                {"data": "depth"},
+                {"data": "id"},
+                {"data": "try",
+         "render": function(data, type, row, meta){
+            if(type === 'display'){
+                data = '<a href="' + "http://orfeus.gein.noa.gr:8085/fdsnws/event/1/query?eventid="+data+"&nodata=404" + '">' + data + '</a>';
+            }
+            
+            return data;
+         }}          
+         
+            ],
+            
+                   
+    } );
+}  
+
+
+
+  
+</script>
+</body>
+</html>

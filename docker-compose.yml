@@ -1,0 +1,40 @@
+version: '3'
+services:
+    serv0:
+        network_mode: host 
+        build: serv0/.
+        
+  
+        ports:
+            - "8000:8000"  
+     
+    serv1:
+        network_mode: host 
+        build: serv1/.
+        
+  
+        ports:
+            - "5001:5001" 
+        
+
+
+    serv2:
+        network_mode: host
+        build: serv2/.
+        
+  
+        ports:
+            - "5002:5002" 
+       
+    
+    serv3:
+        network_mode: host
+        build: serv3/.
+        
+  
+        ports:
+            - "5003:5003"
+        
+
+        
+
